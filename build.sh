@@ -1,25 +1,27 @@
 #!/bin/sh
 
-CUR_DIR=$(cd `dirname $0`; pwd)
-BUILD_DIR="$CUR_DIR/~build"
-PKG_DIR="$CUR_DIR/~pkg"
+# just for simplifying the jobs
 
-[ -d "${BUILD_DIR}" ] || mkdir "${BUILD_DIR}"
-[ -d "${PKG_DIR}" ] || mkdir "${PKG_DIR}"
+curdir=$(cd `dirname $0`; pwd)
+cachedir="$curdir/~build"
+export PKGDEST="$curdir/~pkg"
+
+[ -d "${BUILDDIR}" ] || mkdir "${BUILDDIR}"
+[ -d "${PKGDEST}" ] || mkdir "${PKGDEST}"
 
 
 _build(){
-  sourcedir="$CUR_DIR/$1"
+  sourcedir="$curdir/$1"
   [ -d "$sourcedir" ] || return
   
-  workdir="$BUILD_DIR/$1"
+  workdir="$cachedir/$1"
   [ -d "$workdir" ] || mkdir "$workdir"
   cd "$workdir"
-  ln -s "$sourcedir/*" ./
+  ln -s $sourcedir/* ./ 2> /dev/null
   
   makepkg -s
   
-  mv *.pkg.tar.xz "${PKG_DIR}"
+  #mv *.pkg.tar.xz "${PKGDEST}"
 }
 
 for pkg in $@ ; do
