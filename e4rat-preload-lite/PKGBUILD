@@ -1,0 +1,27 @@
+# Maintener: Abi Hafshin [ http://hafs.in ]
+
+pkgname=e4rat-preload-lite
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Replacement for e4rat-preload, which was written by Andreas Rid, 2011."
+arch=('i686' 'x86_64')
+url="http://e4rat-l.bananarocker.org/"
+license=('GPL3')
+optdepends=('e4rat: collect startup info and reallocate files')
+#install=${pkgname}.install
+source=("${pkgname}.c" 'config.h')
+md5sums=('99f34e19187c6088d5f20b79816bb192'
+         '44a46f2b5852d4debfdcf618a228aa95')
+build()
+{
+    cd "$srcdir"
+    
+    [ "" = "${CC}" ] && CC=gcc
+
+    ${CC} ${CFLAGS} "${pkgname}.c" -o "${pkgname}"
+}
+
+package()
+{
+    install -D -m744 "${srcdir}/${pkgname}" "${pkgdir}/usr/bin/${pkgname}"
+}
