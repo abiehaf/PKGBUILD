@@ -3,8 +3,8 @@
 # just for simplifying the jobs
 
 curdir=$(cd `dirname $0`; pwd)
-cachedir="$curdir/~build"
-export PKGDEST="$curdir/~pkg"
+cachedir="$curdir/1-build"
+export PKGDEST="$curdir/0-pkg"
 
 [ -d "${BUILDDIR}" ] || mkdir "${BUILDDIR}"
 [ -d "${PKGDEST}" ] || mkdir "${PKGDEST}"
