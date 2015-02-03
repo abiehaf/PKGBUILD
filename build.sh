@@ -19,7 +19,7 @@ _build(){
   cd "$workdir"
   ln -s $sourcedir/* ./ 2> /dev/null
   
-  makepkg -s
+  makepkg -s --sign
   
   #mv *.pkg.tar.xz "${PKGDEST}"
 }
