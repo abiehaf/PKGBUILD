@@ -9,7 +9,7 @@
 # Running with a 1000 HZ tick rate (vs the ARCH 300) is reported to solve the
 # issues with the bfs/linux 3.1x and suspend. For more see:
 # http://ck-hack.blogspot.com/2013/09/bfs-0441-311-ck1.html?showComment=1378756529345#c5266548105449573343
-_1k_HZ_ticks=n
+_1k_HZ_ticks=y
 
 # NUMA is optimized for multi-socket motherboards.
 # A single multi-core CPU actually runs slower with NUMA enabled.
@@ -45,14 +45,14 @@ _BFQ_enable_=y
 
 ### Do not edit below this line unless you know what you're doing
 
-_kernelname=-hf
 _majorver=3.18
-_minorver=10
-pkgrel=1
+_minorver=11
+pkgrel=2
 
-pkgbase=linux-${_kernelname}
+_kernelname=-hf
+pkgbase=linux${_kernelname}
 _pkgdesc='Linux Kernel and modules with the bfq, bfs, and uksm patches'
-pkgname=('${pkgbase}' '${pkgbase}-headers')
+pkgname=(${pkgbase} ${pkgbase}-headers)
 pkgver=${_majorver}.${_minorver}
 arch=('i686' 'x86_64')
 url="http://kernel.org/"
@@ -77,29 +77,15 @@ source=("http://www.kernel.org/pub/linux/kernel/v3.x/linux-${_majorver}.tar.xz"
         "https://www.kernel.org/pub/linux/kernel/v3.x/patch-${pkgver}.sign"
         "http://kerneldedup.org/download/uksm/${_uksmvernel}/uksm-${_uksmvernel}-for-${_uksmname}.patch" # website often went down
         #"uksm-${_uksmvernel}-for-${_uksmname}.patch"
-        "http://ck.kolivas.org/patches/3.0/${_majorver}/${_majorver}-ck${_ckpatchversion}/${_ckpatchname}.xz"
+        
+"http://ck.kolivas.org/patches/3.0/${_majorver}/${_majorver}-ck${_ckpatchversion}/${_ckpatchname}.bz2"
         "${_bfqpath}/0001-block-cgroups-kconfig-build-bits-for-BFQ-${_bfqver}-${_majorver}.patch"
         "${_bfqpath}/0002-block-introduce-the-BFQ-${_bfqver}-I-O-sched-for-${_majorver}.patch"
         "${_bfqpath}/0003-block-bfq-add-Early-Queue-Merge-EQM-to-BFQ-${_bfqver}-for-${_majorver}.0.patch"
         "http://repo-ck.com/source/gcc_patch/${_gcc_patch}.gz"
-        'linux-uksm-ck.preset'
+        "${pkgbase}.preset"
         'change-default-console-loglevel.patch'
         'config' 'config.x86_64')
-
-sha512sums=('d77bfd9b1cd524ac50bb5a93808955be2f9bcd2ec0badcc8aa6a63401e212f891fd14bd27c6441174ba5d70ab875b9e76c7ebc95f046e31aff1d40790d30351c'
-            'SKIP'
-            '5e7b1bfc57b04386cd581d76afd341d0276ed0142b6f5f17c7d2b534e9807a0d21508edfecc670ee51e3353d7985bbe04cc10a22ad557f072fac15df4234cf0a'
-            'SKIP'
-            'b99dbb7b21b443dbf107a628255f216db8c86f936956fae6a21c74510be1be32cf9e45318fc5cf865e9272e80ec4d246f252b22560fea6799040582f4082163b'
-            'e8d172b93597ad9023c00e07d6825ace8cb5bf421c7b8b77941262c95908dbe3129a7dfe6215dcd34b92f5e08cf7c58571b6b166aee24c1f9807fe74963b3806'
-            'a4f9b4cc5ac85d3bf9b8a3420fd550bf1361d24f1314953d7c073f07a4d008ee5bfcadafba28bd57aa7228857392c131af12a0804da256bc98cfd9462112051e'
-            '04cd37e2043c32e27406720a12212227fd307c67024e27127386e9c6f20e8fdd04c1a423b334cc41868dac935de0c8e59ef2220bddbb4b1e47f4e6c115bf0091'
-            '5298979067a41dc6506a08664ef70fc3d9ef5155a1ac6a7cc65e050282498d3451aa3077028c05d97e9467ee7d083ce45606ab2582558a26a2cc95c8b6cbfa81'
-            '1610ad6cddde1bcb9ec3950053335ea801ece18429a56a0e13fbd67409eeca388a9ccf8cae773210c9ab5393acbe19e8c0af1310adf288af025f81dedda28ee4'
-            'af8f425ac196a3282903539171b76b0c0063630c54dc64b843f80b77651c41225b871b7ecd3679919338eb790b9032b6a4c78f7be1995eccad5d14ef4b59f8f5'
-            'd9d28e02e964704ea96645a5107f8b65cae5f4fb4f537e224e5e3d087fd296cb770c29ac76e0ce95d173bc420ea87fb8f187d616672a60a0cae618b0ef15b8c8'
-            '6e3fabe01077ffaca7625c5adc2081cb750181930383bcc9773880412846841d2bb0ae8a7b26e3f1631ab2deeb1f3bb313a215635b7148d1987cff13a3da4cd4'
-            '9b3b496e4d1d2aeba92f074a3ca56760b4d8f2b984c729a520a139e3b4ce59def113e50adbfde1771b30afb16883fe55fe0b627bb81dc92bc444f0e18192b062')
 
 validpgpkeys=(
               'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linus Torvalds
@@ -252,7 +238,7 @@ build() {
     # Tweak kernel options prior to a build via nconfig
     # make nconfig
     # Tweak kernel options prior to a build via menuconfig
-    # make menuconfig
+    make menuconfig
     msg "Running make bzImage and modules"
     make ${MAKEFLAGS} LOCALVERSION= bzImage modules
 }
@@ -261,8 +247,8 @@ _package() {
     pkgdesc="${_pkgdesc}"
     depends=('coreutils' 'linux-firmware' 'mkinitcpio>=0.7')
     optdepends=('crda: to set the correct wireless channels of your country' 'modprobed-db: Keeps track of EVERY kernel module that has ever been probed - useful for those of us who make localmodconfig')
-    backup=("etc/mkinitcpio.d/linux-uksm-ck.preset")
-    install=linux-uksm-ck.install
+    backup=("etc/mkinitcpio.d/${pkgbase}.preset")
+    install=${pkgbase}.install
 
     cd ${_srcname}
 
@@ -275,34 +261,34 @@ _package() {
 
     mkdir -p "${pkgdir}"/{lib/modules,lib/firmware,boot}
     make LOCALVERSION= INSTALL_MOD_PATH="${pkgdir}" modules_install
-    cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-linux-uksm-ck"
+    cp arch/$KARCH/boot/bzImage "${pkgdir}/boot/vmlinuz-${pkgbase}"
 
     # set correct depmod command for install
     cp -f "${startdir}/${install}" "${startdir}/${install}.pkg"
     true && install=${install}.pkg
     sed \
-    -e "s/KERNEL_NAME=.*/KERNEL_NAME=-uksm-ck/g" \
+    -e "s/KERNEL_NAME=.*/KERNEL_NAME=${_kernelname}/g" \
     -e "s/KERNEL_VERSION=.*/KERNEL_VERSION=${_kernver}/g" \
     -i "${startdir}/${install}"
 
     # install mkinitcpio preset file for kernel
-    install -D -m644 "${srcdir}/linux-uksm-ck.preset" "${pkgdir}/etc/mkinitcpio.d/linux-uksm-ck.preset"
+    install -D -m644 "${srcdir}/${pkgbase}.preset" "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
     sed \
-    -e "1s|'linux.*'|'linux-uksm-ck'|" \
-    -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-linux-uksm-ck\"|" \
-    -e "s|default_image=.*|default_image=\"/boot/initramfs-linux-uksm-ck.img\"|" \
-    -e "s|fallback_image=.*|fallback_image=\"/boot/initramfs-linux-uksm-ck-fallback.img\"|" \
-    -i "${pkgdir}/etc/mkinitcpio.d/linux-uksm-ck.preset"
+    -e "1s|'linux.*'|'${pkgbase}'|" \
+    -e "s|ALL_kver=.*|ALL_kver=\"/boot/vmlinuz-${pkgbase}\"|" \
+    -e "s|default_image=.*|default_image=\"/boot/initramfs-${pkgbase}.img\"|" \
+    -e "s|fallback_image=.*|fallback_image=\"/boot/initramfs-${pkgbase}-fallback.img\"|" \
+    -i "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
 
     # remove build and source links
     rm -f "${pkgdir}"/lib/modules/${_kernver}/{source,build}
     # remove the firmware
     rm -rf "${pkgdir}/lib/firmware"
     # make room for external modules
-    ln -s "../extramodules-${_basekernel}${_kernelname:uksm-ck}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
+    ln -s "../extramodules-${_basekernel}${_kernelname}" "${pkgdir}/lib/modules/${_kernver}/extramodules"
     # add real version for building modules and running depmod from post_install/upgrade
-    mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:uksm-ck}"
-    echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname:uksm-ck}/version"
+    mkdir -p "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname}"
+    echo "${_kernver}" > "${pkgdir}/lib/modules/extramodules-${_basekernel}${_kernelname}/version"
 
     # Now we call depmod...
     depmod -b "${pkgdir}" -F System.map "${_kernver}"
@@ -459,3 +445,17 @@ for _p in ${pkgname[@]}; do
 done
 
 
+md5sums=('9e854df51ca3fef8bfe566dbd7b89241'
+         'SKIP'
+         'ac5c93edbc9385793ccc33f4ced85950'
+         'SKIP'
+         'b6a2b2aae9c2844d0c74690632d7019e'
+         '132112d60831bf40dcb812fa7ab72f21'
+         '1c7c2d0338939a9e6953a64d80861471'
+         'a81346cce95baeac2c56cf60d3c7e5b6'
+         '8f2743651280f5a022e541f4e95e5546'
+         '23f94e1dba2b1ffc5b07effc3c102f62'
+         '96de7c9b4fc5e6b95c990dff757da5cc'
+         'df7fceae6ee5d7e7be7b60ecd7f6bb35'
+         'ab50dd3d7fac304a414b6767c20fefeb'
+         '50373350c36a21d71e55ba901101e6be')
